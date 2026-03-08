@@ -80,6 +80,13 @@
 | C-35 | QA funcional `rotos` ejecutada con reporte limpio | Cumple | `ROTOS_REPORT.md`, `ROTOS_REPORT.json`, `07-QA-AUDITORIA.md` |
 | C-36 | Auditoria global de cumplimiento ejecutada | Cumple | `07-QA-AUDITORIA.md` (PASS 33/33) |
 | C-37 | Seguridad pre-deploy documentada | Cumple | `08-SEGURIDAD-PREDEPLOY.md` |
+| C-38 | GATE 7 aprobado | Cumple | `CHECKLIST-CONTROL.md` |
+| C-39 | GATE 8 aprobado | Cumple | `CHECKLIST-CONTROL.md` |
+| C-40 | Sincronizacion GitHub completada | Cumple | `09-ENTREGA-DEPLOY.md` |
+| C-41 | Deploy productivo en Vercel completado | Cumple | `09-ENTREGA-DEPLOY.md` |
+| C-42 | Cierre y handover tecnico documentados | Cumple | `10-CIERRE-HANDOVER.md` |
+| C-43 | Aprobacion GATE 9 | Cumple | `CHECKLIST-CONTROL.md`, `09-ENTREGA-DEPLOY.md` |
+| C-44 | Aprobacion GATE 10 | Cumple | `CHECKLIST-CONTROL.md`, `10-CIERRE-HANDOVER.md` |
 
 ## Condiciones de cierre
 - [ ] GATE 9 cerrado

@@ -36,12 +36,15 @@
 - [x] GATE 6 aprobado por developer.
 - [x] Paso 7 ejecutado con `rotos` + `audit` PASS (`07-QA-AUDITORIA.md`).
 - [x] Paso 8 ejecutado y documentado (`08-SEGURIDAD-PREDEPLOY.md`).
+- [x] GATE 7 aprobado por developer.
+- [x] GATE 8 aprobado por developer.
+- [x] Paso 9 ejecutado: GitHub sync + deploy Vercel completados.
+- [x] Paso 10 documentado con handover y backlog.
+- [x] GATE 9 aprobado por developer.
+- [x] GATE 10 aprobado por developer.
 
 ## Pendiente
-- [ ] Aprobacion humana de GATE 7.
-- [ ] Aprobacion humana de GATE 8.
-- [ ] Paso 9 (GH + deploy) con confirmacion humana explicita.
-- [ ] Paso 10 (cierre y handover final).
+- [x] Sin pendientes criticos de workflow `init`.
 
 ## GATEs
 - [x] GATE 1
@@ -50,10 +53,10 @@
 - [x] GATE 4
 - [x] GATE 5
 - [x] GATE 6
-- [ ] GATE 7
-- [ ] GATE 8
-- [ ] GATE 9
-- [ ] GATE 10
+- [x] GATE 7
+- [x] GATE 8
+- [x] GATE 9
+- [x] GATE 10
 
 ## Registro rapido
 - [2026-03-08] Paso 1 - Estado: en curso - Nota: Artefactos obligatorios creados con supuestos iniciales.
@@ -72,6 +75,8 @@
 - [2026-03-08] Paso 3 - Estado: completo - Nota: revalidado con stack final (Socket.IO + Redis + Clerk/Auth.js).
 - [2026-03-08] Paso 7 - Estado: completo - Nota: `rotos` limpio + `audit` final PASS.
 - [2026-03-08] Paso 8 - Estado: completo - Nota: hardening pre-deploy documentado.
+- [2026-03-08] Paso 9 - Estado: completo - Nota: repo GitHub sincronizado y deploy productivo listo en Vercel.
+- [2026-03-08] Paso 10 - Estado: completo - Nota: cierre y handover documentados en `10-CIERRE-HANDOVER.md`.
 
 ## Evidencias por GATE
 - [2026-03-08] GATE 1 - Archivo: `01-BRIEFING.md` - Evidencia: correo exacto del cliente consolidado (Pulseboard + alcance completo).
@@ -86,3 +91,5 @@
 - [2026-03-08] GATE 6 - Archivo: `06-IMPLEMENTACION-MVP.md` - Evidencia: rutas/app shell/board/list/reports/activity implementados.
 - [2026-03-08] GATE 7 - Archivo: `07-QA-AUDITORIA.md` - Evidencia: `ROTOS_REPORT` sin issues + `audit` PASS 33/33.
 - [2026-03-08] GATE 8 - Archivo: `08-SEGURIDAD-PREDEPLOY.md` - Evidencia: checklist de seguridad completado y riesgos remanentes documentados.
+- [2026-03-08] GATE 9 - Archivo: `09-ENTREGA-DEPLOY.md` - Evidencia: GitHub `origin/main` sincronizado + Vercel `Ready` + alias canonico.
+- [2026-03-08] GATE 10 - Archivo: `10-CIERRE-HANDOVER.md` - Evidencia: manual operativo, riesgos remanentes y backlog de continuidad.
