@@ -1,0 +1,9 @@
+{
+  "kind": "placeholder_component",
+  "severity": "low",
+  "file": "C:\\Users\\g-cub\\Antigravity projects\\playground\\2- Kanban colaborativo estilo Linear\\components\\mock-data.ts",
+  "line": 87,
+  "symbol": "Todo",
+  "detail": "Texto placeholder detectado: 'Todo'.",
+  "suggestion": "Reemplazar contenido temporal por contenido final."
+}

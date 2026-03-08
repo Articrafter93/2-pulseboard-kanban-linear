@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - MOCK_DB_ENABLED=true
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - REALTIME_SERVICE_URL=http://localhost:4001
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - realtime
+      - db
+
+  realtime:
+    build:
+      context: ./realtime-service
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    volumes:
+      - ./realtime-service:/service
+      - /service/node_modules
+    environment:
+      - REALTIME_PORT=4001
+      - REDIS_URL=redis://redis:6379
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=pulseboard
+      - POSTGRES_PASSWORD=pulseboard
+      - POSTGRES_DB=pulseboard
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
