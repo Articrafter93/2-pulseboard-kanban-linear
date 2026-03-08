@@ -12,14 +12,12 @@
 ## Sincronizacion GitHub
 - Repositorio remoto: `https://github.com/Articrafter93/pulseboard-kanban-linear.git`
 - Rama de produccion: `main`
-- SHA desplegado: `6b03153b52f96d1399ce1744ca480de82bcbe881`
-- Estado HEAD vs origin/main: `SYNC_OK`
+- Estado HEAD vs origin/main al momento del deploy: `SYNC_OK`
 
 ## Despliegue Vercel (produccion)
 - Proyecto Vercel: `pulseboard-kanban-linear`
-- Deployment URL (ultimo): `https://pulseboard-kanban-linear-565snnrif-articrafter93s-projects.vercel.app`
 - Alias principal canonico: `https://pulseboard-kanban-linear.vercel.app`
-- Inspect URL dashboard: `https://vercel.com/articrafter93s-projects/pulseboard-kanban-linear/DLhUwJZetAuAH7orQfVnoibeSnBz`
+- Dashboard del proyecto: `https://vercel.com/articrafter93s-projects/pulseboard-kanban-linear`
 - Estado final: `Ready`
 
 ## Notas operativas
