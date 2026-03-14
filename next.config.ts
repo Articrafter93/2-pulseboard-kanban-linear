@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 import path from "node:path";
+import { env } from "./lib/env";
+
+void env;
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,

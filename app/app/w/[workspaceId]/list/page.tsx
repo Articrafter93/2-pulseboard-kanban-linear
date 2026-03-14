@@ -1,14 +1,31 @@
 import { PriorityBadge } from "@/components/priority-badge";
-import { tasks } from "@/components/mock-data";
+import { prisma } from "@/lib/prisma";
+import { ensureWorkspaceSeed, mapTaskToDto } from "@/lib/workspace-seed";
 
-export default function ListPage() {
+export default async function ListPage({
+  params,
+}: {
+  params: Promise<{ workspaceId: string }>;
+}) {
+  const { workspaceId } = await params;
+  const { organization } = await ensureWorkspaceSeed(workspaceId);
+
+  const tasks = await prisma.task.findMany({
+    where: { organizationId: organization.id },
+    include: { assignee: { select: { displayName: true } } },
+    orderBy: [{ updatedAt: "desc" }],
+    take: 150,
+  });
+
+  const items = tasks.map(mapTaskToDto);
+
   return (
     <section className="rounded-xl border border-line bg-panel p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-[var(--font-display)] text-xl">Task List</h2>
         <div className="flex gap-2 text-xs">
-          <span className="rounded-full border border-line px-2 py-1 text-muted">Filter: All statuses</span>
-          <span className="rounded-full border border-line px-2 py-1 text-muted">Sort: Priority</span>
+          <span className="rounded-full border border-line px-2 py-1 text-muted">Persistencia: Prisma</span>
+          <span className="rounded-full border border-line px-2 py-1 text-muted">Top 150</span>
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -23,11 +40,11 @@ export default function ListPage() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map((task) => (
+            {items.map((task) => (
               <tr key={task.id} className="border-b border-line/70">
                 <td className="py-3">
                   <p className="font-medium">{task.title}</p>
-                  <p className="text-xs text-muted">{task.project}</p>
+                  <p className="text-xs text-muted">{task.id.slice(0, 8)}</p>
                 </td>
                 <td className="py-3">
                   <PriorityBadge priority={task.priority} />
@@ -43,4 +60,3 @@ export default function ListPage() {
     </section>
   );
 }
-

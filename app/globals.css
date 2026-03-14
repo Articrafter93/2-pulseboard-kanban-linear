@@ -12,13 +12,15 @@ body {
 }
 
 body {
-  background: radial-gradient(circle at 20% 0%, #172231 0%, #0d1117 40%);
-  color: #e6edf3;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(94, 106, 210, 0.28) 0%, rgba(15, 15, 19, 0) 30%),
+    radial-gradient(circle at 95% 95%, rgba(70, 192, 154, 0.12) 0%, rgba(15, 15, 19, 0) 35%),
+    #0f0f13;
+  color: #f4f6fa;
 }
 
 .glass {
-  background: linear-gradient(180deg, rgba(22, 27, 34, 0.92), rgba(16, 21, 30, 0.92));
-  border: 1px solid #293444;
+  background: linear-gradient(180deg, rgba(21, 24, 33, 0.92), rgba(17, 20, 29, 0.92));
+  border: 1px solid #2a3142;
   backdrop-filter: blur(10px);
 }
-

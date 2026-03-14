@@ -1,5 +1,5 @@
 import { BoardView } from "@/components/board-view";
-import { tasks } from "@/components/mock-data";
+import { getRealtimeUser } from "@/lib/auth-runtime";
 
 export default async function BoardPage({
   params,
@@ -7,6 +7,6 @@ export default async function BoardPage({
   params: Promise<{ workspaceId: string }>;
 }) {
   const { workspaceId } = await params;
-  return <BoardView workspaceId={workspaceId} initialTasks={tasks} />;
+  const currentUser = await getRealtimeUser();
+  return <BoardView workspaceId={workspaceId} currentUser={currentUser} />;
 }
-

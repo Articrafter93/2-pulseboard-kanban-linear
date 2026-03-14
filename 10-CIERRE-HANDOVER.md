@@ -1,60 +1,31 @@
 # 10-CIERRE-HANDOVER
 
 - Proyecto: Pulseboard (provisional)
-- Fecha: 2026-03-08
-- Fase: Paso 10 - Cierre y handover
+- Fecha: 2026-03-14
+- Fase: cierre tecnico posterior a ronda final de exigencias
 
-## Resumen de entrega
-- Producto inicial desplegado y accesible en produccion.
-- Arquitectura final alineada al stack oficial del cliente:
-  - Next.js App Router + TypeScript
-  - PostgreSQL + Prisma
-  - Realtime service separado con Socket.IO
-  - Redis Pub/Sub
-  - Clerk Organizations (preferido) / Auth.js fallback
-  - Docker
+## Entrega final implementada
+- Auth real minima con Clerk en signin/signup + proteccion de rutas privadas.
+- Board persistente con Prisma/PostgreSQL (GET/POST/PATCH tasks).
+- Realtime operativo con Socket.IO + Redis adapter + presencia + cursores.
+- Estado de reconexion en UI con backoff de Socket.IO.
+- Rate limiting en API y sockets.
+- Virtualizacion por columna (`@tanstack/react-virtual`) + paginacion por status.
+- Drag and drop migrado a `dnd-kit`.
+- `loading.tsx` y `error.tsx` en ruta de tablero.
+- Tailwind actualizado con tokens Pulseboard (oscuro + acento #5E6AD2).
+- README de producto reescrito con arquitectura Mermaid y setup completo.
+- Pipeline CI obligatorio (`.github/workflows/ci.yml`).
 
-## Evidencia de cumplimiento
-- Workflow y artefactos completos:
-  - `01-BRIEFING.md`
-  - `MATRIZ-BACKEND.md`
-  - `00-ARQUITECTURA-PROYECTO.md`
-  - `02-ARQUITECTURA-SITIO.md`
-  - `CHECKLIST-CONTROL.md`
-  - `REDO-TRACKING.md`
-- QA y cumplimiento:
-  - `ROTOS_REPORT.md` / `ROTOS_REPORT.json` (0 issues)
-  - `07-QA-AUDITORIA.md` (audit PASS)
-  - `08-SEGURIDAD-PREDEPLOY.md`
+## Evidencia principal
+- API tasks persistente: `app/api/tasks/route.ts`
+- Movimiento persistente: `app/api/tasks/[taskId]/move/route.ts`
+- Realtime service: `realtime-service/src/server.ts`
+- Contratos compartidos: `shared/realtime-events.ts`
+- Board cliente realtime: `components/board-view.tsx`
+- Tests E2E: `tests/e2e/*.spec.ts`
+- Artefactos Lighthouse: `artifacts/lighthouse/production-2026-03-14.report.*`
 
-## Manual de operacion minima
-1. Desarrollo local web:
-   - `npm install`
-   - `npm run dev`
-2. Realtime service local:
-   - `cd realtime-service`
-   - `npm install`
-   - `npm run dev`
-3. Docker integrado:
-   - `docker compose up --build`
-4. Validacion tecnica:
-   - `npm run lint`
-   - `npm run build`
-
-## Riesgos remanentes
-- Persistencia real en DB aun no cableada en todos los flujos (modo mock-first activo).
-- Integracion Clerk/Auth aun no conectada end-to-end en UI/API.
-- Realtime frontend aun no suscrito al servicio Socket.IO.
-- Activos de marca y redes oficiales del cliente siguen pendientes.
-
-## Backlog inmediato recomendado
-1. Integrar Clerk Organizations y RBAC servidor real.
-2. Habilitar Prisma en rutas core (workspaces/proyectos/tareas) con migraciones.
-3. Conectar cliente Socket.IO al realtime-service para presencia/updates reales.
-4. Sustituir mock data por datos persistentes progresivamente.
-5. Completar identidad visual con assets oficiales del cliente.
-
-## Estado GATE 10 (pre-validacion)
-- Documentacion tecnica y operativa: completa.
-- Riesgos y plan de continuidad: completos.
-- Aprobacion humana de GATE 10: aprobada.
+## Observaciones operativas
+- Docker realtime: existe y esta activo en compose (`realtime-service/Dockerfile`).
+- Para ejecutar E2E de login/sincronizacion multiusuario se requieren credenciales Clerk de test en variables `E2E_CLERK_*`.

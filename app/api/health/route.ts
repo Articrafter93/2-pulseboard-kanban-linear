@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { env } from "@/lib/env";
 
 const HealthQuerySchema = z.object({
   workspaceId: z.string().min(1).optional(),
@@ -17,7 +18,8 @@ export async function GET(request: Request) {
   return NextResponse.json({
     status: "ok",
     service: "pulseboard-web",
-    mockMode: process.env.MOCK_DB_ENABLED ?? "true",
+    mockMode: env.MOCK_DB_ENABLED,
+    envValidated: true,
     workspaceId: parsed.data.workspaceId ?? null,
   });
 }

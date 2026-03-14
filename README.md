@@ -1,71 +1,135 @@
-# Pulseboard MVP
+# Pulseboard Kanban Linear
 
-Pulseboard is a premium-style collaborative work management app inspired by the speed and visual clarity of tools like Linear.
+Pulseboard es un tablero Kanban colaborativo inspirado en la experiencia de Linear: rápido, ordenado y con colaboración en tiempo real.
 
-## Tech Stack
-- Next.js 15 + TypeScript
-- Tailwind CSS
-- PostgreSQL + Prisma schema
-- Separate Socket.IO realtime service
-- Redis Pub/Sub for WebSocket scale
-- Clerk Organizations (preferred) / Auth.js fallback
-- Mock-first data mode (`MOCK_DB_ENABLED=true`)
-- Docker local setup (`app` + `realtime` + `redis` + `postgres`)
+## Producción
+- URL canónica: https://pulseboard-kanban-linear.vercel.app
 
-## Scripts
-- `npm run dev`
-- `npm run lint`
-- `npm run build`
-- `npm run start`
+## Repositorio
+- GitHub: https://github.com/Articrafter93/2-pulseboard-kanban-linear
 
-## Quick Start
-1. Install dependencies:
+## Estado de la entrega
+- Auth: Clerk (signin/signup y protección de rutas `/app/**`).
+- Board: persistencia real en PostgreSQL con Prisma.
+- Realtime: servicio Socket.IO separado con Redis adapter, presencia y cursores.
+- Seguridad operativa: validación fail-fast de variables de entorno + rate limiting en API y sockets.
+- QA: suite Playwright E2E y pipeline CI obligatorio.
+
+## Arquitectura
+```mermaid
+flowchart LR
+  U[Usuario] --> W[Next.js App Router]
+  W --> A[API /api/tasks]
+  A --> P[(PostgreSQL)]
+  A --> R[(Redis)]
+  W <--> S[realtime-service Socket.IO]
+  S <--> R
+  W --> C[Clerk]
+```
+
+## Repositorio y servicios
+- `app/`: frontend + route handlers Next.js.
+- `realtime-service/`: servicio Socket.IO independiente (tiene su propio `Dockerfile`).
+- `prisma/schema.prisma`: modelo de datos.
+- `shared/realtime-events.ts`: contratos tipados compartidos de eventos realtime.
+
+## Variables de entorno
+Usa `.env.example` como plantilla. Variables críticas (obligatorias en runtime):
+
+| Variable | Uso |
+|---|---|
+| `DATABASE_URL` | Conexión Prisma a PostgreSQL |
+| `REDIS_URL` | Rate limiting y adapter realtime |
+| `CLERK_SECRET_KEY` | Auth server-side |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Auth client-side |
+| `NEXT_PUBLIC_REALTIME_SERVICE_URL` | URL pública del servicio Socket.IO |
+| `NEXT_PUBLIC_APP_URL` | URL base de la app |
+| `NEXT_PUBLIC_AUTH_PROVIDER` | `mock` (local sin Clerk) o `clerk` (auth real) |
+
+## Setup local paso a paso
+1. Instalar dependencias:
 ```bash
 npm install
+npm --prefix realtime-service install
 ```
-2. Verify `.env.local` exists (already included with mock-first defaults).
-3. Start development:
+
+2. Configurar entorno:
+```bash
+cp .env.example .env.local
+```
+
+3. Levantar PostgreSQL y Redis (Docker Desktop):
+```bash
+docker compose up -d db redis
+```
+
+4. Preparar base de datos:
+```bash
+npm run prisma:generate
+npm run prisma:push
+npm run prisma:seed
+```
+
+5. Ejecutar servicios:
 ```bash
 npm run dev
+npm run realtime:dev
 ```
-4. Open `http://localhost:3000`.
 
-## Docker Local
+6. Abrir:
+- Web: `http://localhost:3000`
+- Realtime health: `http://localhost:4001/health`
+
+## Docker
+### Web
+```bash
+docker build -t pulseboard-web .
+```
+
+### Realtime (Dockerfile propio)
+```bash
+docker build -t pulseboard-realtime ./realtime-service
+```
+
+### Compose local
 ```bash
 docker compose up --build
 ```
 
-## Realtime Service
-- Source: `realtime-service/src/server.ts`
-- Default URL: `http://localhost:4001`
-- Uses Redis adapter for cross-instance event propagation.
-
-## Core Routes
-- `/` marketing + product positioning
-- `/signin` and `/signup`
-- `/app/w/default/board`
-- `/app/w/default/list`
-- `/app/w/default/calendar`
-- `/app/w/default/task/T-1001`
-- `/app/w/default/reports`
-- `/app/w/default/activity`
-
-## API Mock Endpoints
-- `GET /api/health`
-- `GET /api/tasks`
-- `GET /api/dashboard`
-
-## Prisma
-- Schema file: `prisma/schema.prisma`
-- Generate client:
+## Testing
+### Lint y build
 ```bash
-npm run prisma:generate
-```
-- Push schema to DB:
-```bash
-npm run prisma:push
+npm run lint
+npm run build
+npm run realtime:build
 ```
 
-## Notes
-- Current build is mock-first and intended as a usable demo baseline.
-- Real auth, DB persistence, realtime provider wiring, and storage adapters are planned in the migration phase.
+### E2E (Playwright)
+```bash
+npm run test:e2e
+```
+
+Variables opcionales para pruebas completas de login/sincronización multiusuario:
+- `E2E_CLERK_EMAIL`
+- `E2E_CLERK_PASSWORD`
+- `E2E_CLERK_EMAIL_2`
+- `E2E_CLERK_PASSWORD_2`
+
+## Lighthouse en producción
+Generación de artefactos:
+```bash
+npm run lighthouse:prod
+```
+
+Salida esperada:
+- `artifacts/lighthouse/production-YYYY-MM-DD.report.html`
+- `artifacts/lighthouse/production-YYYY-MM-DD.report.json`
+
+## CI obligatorio
+`/.github/workflows/ci.yml` ejecuta:
+1. Lint
+2. Build web
+3. Build realtime
+4. Playwright E2E
+
+Si alguna etapa falla, el merge debe bloquearse.
