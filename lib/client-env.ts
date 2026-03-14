@@ -1,10 +1,15 @@
 import { z } from "zod";
 
+const authProviderSchema = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() : value),
+  z.enum(["mock", "clerk"]),
+);
+
 const clientSchema = z.object({
   NEXT_PUBLIC_APP_NAME: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_REALTIME_SERVICE_URL: z.string().url(),
-  NEXT_PUBLIC_AUTH_PROVIDER: z.enum(["mock", "clerk"]).default("mock"),
+  NEXT_PUBLIC_AUTH_PROVIDER: authProviderSchema.default("mock"),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1),
   NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().min(1),

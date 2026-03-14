@@ -1,82 +1,97 @@
-# Pulseboard Kanban Linear
+# PulseBoard Kanban Linear
 
-Pulseboard es un tablero Kanban colaborativo inspirado en la experiencia de Linear: rápido, ordenado y con colaboración en tiempo real.
+[Producción](https://pulseboard-kanban-linear.vercel.app) · [Repositorio](https://github.com/Articrafter93/2-pulseboard-kanban-linear)
 
-## Producción
-- URL canónica: https://pulseboard-kanban-linear.vercel.app
+PulseBoard es un tablero Kanban colaborativo inspirado en Linear, con persistencia real en PostgreSQL, sincronización en tiempo real sobre Socket.IO+Redis, autenticación con Clerk (o modo `mock` para desarrollo), rate limiting y pruebas E2E con Playwright.
 
-## Repositorio
-- GitHub: https://github.com/Articrafter93/2-pulseboard-kanban-linear
-
-## Estado de la entrega
-- Auth: Clerk (signin/signup y protección de rutas `/app/**`).
-- Board: persistencia real en PostgreSQL con Prisma.
-- Realtime: servicio Socket.IO separado con Redis adapter, presencia y cursores.
-- Seguridad operativa: validación fail-fast de variables de entorno + rate limiting en API y sockets.
-- QA: suite Playwright E2E y pipeline CI obligatorio.
+## Estado actual
+- Auth y protección de rutas: `middleware.ts` + páginas `/signin` y `/signup`.
+- Board persistente: creación y movimiento de tareas en DB (Prisma).
+- Realtime productivo: sync de tareas, presencia y cursor colaborativo.
+- Hardening: validación runtime de entorno con Zod + rate limiting en API y sockets.
+- Performance: virtualización por columna con `@tanstack/react-virtual`.
+- QA: CI con `lint`, `build`, `realtime:build` y `test:e2e`.
 
 ## Arquitectura
 ```mermaid
 flowchart LR
-  U[Usuario] --> W[Next.js App Router]
-  W --> A[API /api/tasks]
-  A --> P[(PostgreSQL)]
-  A --> R[(Redis)]
-  W <--> S[realtime-service Socket.IO]
-  S <--> R
-  W --> C[Clerk]
+  U[Usuario] --> W[Web Next.js App Router]
+  W --> API[Route Handlers /api/tasks]
+  API --> PG[(PostgreSQL)]
+  API --> REDIS[(Redis)]
+  W <--> RT[realtime-service Socket.IO]
+  RT <--> REDIS
+  W --> AUTH[Clerk]
+  CI[GitHub Actions] --> W
+  CI --> RT
 ```
 
-## Repositorio y servicios
-- `app/`: frontend + route handlers Next.js.
-- `realtime-service/`: servicio Socket.IO independiente (tiene su propio `Dockerfile`).
-- `prisma/schema.prisma`: modelo de datos.
-- `shared/realtime-events.ts`: contratos tipados compartidos de eventos realtime.
+## Estructura del repositorio
+- `app/`: App Router, UI y Route Handlers.
+- `components/`: UI shared + board virtualizado/dnd.
+- `lib/`: env, auth runtime, rate limit, mapeos de dominio.
+- `shared/realtime-events.ts`: contratos tipados compartidos web/realtime.
+- `prisma/`: schema, seed y utilidades de DB.
+- `realtime-service/`: servicio Socket.IO con Dockerfile propio.
+- `tests/e2e/`: pruebas Playwright (auth, persistencia, realtime).
+- `artifacts/lighthouse/`: reportes de Lighthouse en producción.
 
 ## Variables de entorno
-Usa `.env.example` como plantilla. Variables críticas (obligatorias en runtime):
+Usar `.env.example` como plantilla base.
 
-| Variable | Uso |
-|---|---|
-| `DATABASE_URL` | Conexión Prisma a PostgreSQL |
-| `REDIS_URL` | Rate limiting y adapter realtime |
-| `CLERK_SECRET_KEY` | Auth server-side |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Auth client-side |
-| `NEXT_PUBLIC_REALTIME_SERVICE_URL` | URL pública del servicio Socket.IO |
-| `NEXT_PUBLIC_APP_URL` | URL base de la app |
-| `NEXT_PUBLIC_AUTH_PROVIDER` | `mock` (local sin Clerk) o `clerk` (auth real) |
+| Variable | Requerida | Uso |
+|---|---|---|
+| `NODE_ENV` | Sí | Entorno Node |
+| `NEXT_PUBLIC_APP_NAME` | Sí | Nombre público de app |
+| `NEXT_PUBLIC_APP_URL` | Sí | URL pública web |
+| `NEXT_PUBLIC_REALTIME_SERVICE_URL` | Sí | URL pública del servicio realtime |
+| `REALTIME_SERVICE_URL` | Sí | URL interna/servidor para realtime |
+| `REALTIME_PORT` | Sí | Puerto del servicio realtime |
+| `DATABASE_URL` | Sí | Conexión Prisma/PostgreSQL |
+| `DIRECT_URL` | Opcional | URL directa para migraciones Prisma |
+| `REDIS_URL` | Sí | Redis para adapter + rate limits |
+| `NEXT_PUBLIC_AUTH_PROVIDER` | Sí | `mock` o `clerk` |
+| `MOCK_DB_ENABLED` | Sí | `true` o `false` |
+| `CLERK_SECRET_KEY` | Condicional | Obligatoria cuando `NEXT_PUBLIC_AUTH_PROVIDER=clerk` |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Condicional | Obligatoria cuando `NEXT_PUBLIC_AUTH_PROVIDER=clerk` |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | Sí | Ruta pública de login |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | Sí | Ruta pública de registro |
+| `RATE_LIMIT_API_WINDOW_MS` | Sí | Ventana de rate limit HTTP |
+| `RATE_LIMIT_API_MAX` | Sí | Máximo requests HTTP por ventana |
+| `RATE_LIMIT_SOCKET_WINDOW_MS` | Sí | Ventana de rate limit WS |
+| `RATE_LIMIT_SOCKET_MAX` | Sí | Máximo eventos WS por ventana |
 
 ## Setup local paso a paso
-1. Instalar dependencias:
+1. Instalar dependencias.
 ```bash
 npm install
 npm --prefix realtime-service install
 ```
 
-2. Configurar entorno:
+2. Crear entorno local.
 ```bash
 cp .env.example .env.local
 ```
 
-3. Levantar PostgreSQL y Redis (Docker Desktop):
+3. Levantar infraestructura base (PostgreSQL + Redis).
 ```bash
 docker compose up -d db redis
 ```
 
-4. Preparar base de datos:
+4. Preparar DB.
 ```bash
 npm run prisma:generate
 npm run prisma:push
 npm run prisma:seed
 ```
 
-5. Ejecutar servicios:
+5. Ejecutar web + realtime.
 ```bash
 npm run dev
 npm run realtime:dev
 ```
 
-6. Abrir:
+6. URLs locales.
 - Web: `http://localhost:3000`
 - Realtime health: `http://localhost:4001/health`
 
@@ -86,50 +101,81 @@ npm run realtime:dev
 docker build -t pulseboard-web .
 ```
 
-### Realtime (Dockerfile propio)
+### Realtime (servicio independiente)
 ```bash
 docker build -t pulseboard-realtime ./realtime-service
 ```
 
-### Compose local
+### Stack completo
 ```bash
 docker compose up --build
 ```
 
-## Testing
-### Lint y build
+## APIs y eventos
+### HTTP
+- `GET /api/tasks`
+- `POST /api/tasks`
+- `PATCH /api/tasks/:taskId/move`
+
+### Socket.IO
+- Cliente -> servidor: `workspace:join`, `task:moved`, `presence:cursor`
+- Servidor -> clientes: `task:moved`, `presence:joined`, `presence:left`, `presence:cursor`
+
+Payloads compartidos en `shared/realtime-events.ts` para evitar drift entre cliente y servidor.
+
+## UX de carga y error por ruta
+Se implementaron boundaries `loading.tsx` y `error.tsx` en rutas críticas del workspace:
+- `/app/w/[workspaceId]/board`
+- `/app/w/[workspaceId]/list`
+- `/app/w/[workspaceId]/reports`
+- `/app/w/[workspaceId]/activity`
+- `/app/w/[workspaceId]/calendar`
+- `/app/w/[workspaceId]/task/[taskId]`
+
+## Virtualización y performance del board
+- Dependencia: `@tanstack/react-virtual` en `package.json`.
+- Implementación activa en `components/board-view.tsx` vía `useVirtualizer`.
+- Objetivo: mantener DOM acotado y scroll fluido en columnas con 100+ tareas.
+
+## Testing y CI
+### Local
 ```bash
 npm run lint
 npm run build
 npm run realtime:build
-```
-
-### E2E (Playwright)
-```bash
 npm run test:e2e
 ```
 
-Variables opcionales para pruebas completas de login/sincronización multiusuario:
-- `E2E_CLERK_EMAIL`
-- `E2E_CLERK_PASSWORD`
-- `E2E_CLERK_EMAIL_2`
-- `E2E_CLERK_PASSWORD_2`
+### E2E incluidos
+- `tests/e2e/auth.spec.ts`
+- `tests/e2e/board-persistence.spec.ts`
+- `tests/e2e/realtime-sync.spec.ts`
 
-## Lighthouse en producción
-Generación de artefactos:
+### Pipeline
+`/.github/workflows/ci.yml` bloquea merge si falla cualquier etapa.
+
+## Lighthouse en producción (Vercel)
+Comando reproducible:
 ```bash
 npm run lighthouse:prod
 ```
 
-Salida esperada:
-- `artifacts/lighthouse/production-YYYY-MM-DD.report.html`
-- `artifacts/lighthouse/production-YYYY-MM-DD.report.json`
+Artefactos versionados:
+- `artifacts/lighthouse/production-2026-03-14.report.html`
+- `artifacts/lighthouse/production-2026-03-14.report.json`
+- `artifacts/lighthouse/production-2026-03-14.report.summary.json`
 
-## CI obligatorio
-`/.github/workflows/ci.yml` ejecuta:
-1. Lint
-2. Build web
-3. Build realtime
-4. Playwright E2E
+Scores reales (`fetchTime: 2026-03-14T05:46:25Z`, URL auditada `https://pulseboard-kanban-linear.vercel.app/`):
+- Performance: `99`
+- Accessibility: `100`
+- Best Practices: `96`
+- SEO: `100`
 
-Si alguna etapa falla, el merge debe bloquearse.
+Cumplimiento de umbrales solicitados:
+- Performance `>= 85`: OK
+- Accessibility `>= 90`: OK
+- Best Practices `>= 90`: OK
+
+## Notas operativas
+- El script `scripts/run-lighthouse.mjs` prioriza Lighthouse CLI y, por estabilidad en Windows, recupera el reporte generado aunque el proceso termine con `EPERM` al limpiar carpeta temporal de Chrome.
+- Si falla CLI sin reporte válido, hace fallback a PageSpeed Insights.

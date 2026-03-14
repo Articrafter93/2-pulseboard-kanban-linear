@@ -1,0 +1,20 @@
+{
+  "status": "ok",
+  "mode": "cli-recovered",
+  "targetUrl": "https://pulseboard-kanban-linear.vercel.app",
+  "generatedAt": "2026-03-14T05:46:33.601Z",
+  "thresholds": {
+    "performance": 85,
+    "accessibility": 90,
+    "bestPractices": 90,
+    "seo": 90
+  },
+  "scores": {
+    "performance": 99,
+    "accessibility": 100,
+    "bestPractices": 96,
+    "seo": 100
+  },
+  "pass": true,
+  "error": null
+}
