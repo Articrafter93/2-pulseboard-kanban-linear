@@ -5,6 +5,14 @@ import { z } from "zod";
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
 const nodeEnvSchema = z.enum(["development", "test", "production"]).default("development");
+const authProviderSchema = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() : value),
+  z.enum(["mock", "clerk"]),
+);
+const mockDbEnabledSchema = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() : value),
+  z.enum(["true", "false"]),
+);
 
 const serverSchema = z.object({
   NODE_ENV: nodeEnvSchema,
@@ -16,8 +24,8 @@ const serverSchema = z.object({
   REDIS_URL: z.string().url(),
   DATABASE_URL: z.string().url(),
   DIRECT_URL: z.string().url().optional(),
-  MOCK_DB_ENABLED: z.enum(["true", "false"]).default("false"),
-  NEXT_PUBLIC_AUTH_PROVIDER: z.enum(["mock", "clerk"]).default("mock"),
+  MOCK_DB_ENABLED: mockDbEnabledSchema.default("false"),
+  NEXT_PUBLIC_AUTH_PROVIDER: authProviderSchema.default("mock"),
   CLERK_SECRET_KEY: z.string().optional(),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1).default("/signin"),
@@ -49,7 +57,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_APP_NAME: z.string().min(1).default("Pulseboard"),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_REALTIME_SERVICE_URL: z.string().url(),
-  NEXT_PUBLIC_AUTH_PROVIDER: z.enum(["mock", "clerk"]).default("mock"),
+  NEXT_PUBLIC_AUTH_PROVIDER: authProviderSchema.default("mock"),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1).default("/signin"),
   NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().min(1).default("/signup"),
