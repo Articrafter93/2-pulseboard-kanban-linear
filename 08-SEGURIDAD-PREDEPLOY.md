@@ -1,36 +1,21 @@
 # 08-SEGURIDAD-PREDEPLOY
 
 - Proyecto: Pulseboard (provisional)
-- Fecha: 2026-03-08
-- Fase: Paso 8 - Seguridad pre-deploy
+- Fecha: 2026-03-14
+- Fase: hardening final previo a aceptacion
 
-## Checklist base
-- [x] No hay secretos hardcodeados.
-- [x] `.env*` protegido por `.gitignore` (solo `.env.example` permitido).
-- [x] `.env.example` actualizado con variables del stack final.
-- [x] Integraciones externas inventariadas sin exponer credenciales.
-- [x] Modo mock-first activo (`MOCK_DB_ENABLED=true`) para evitar dependencia de DB real.
-
-## Checklist adicional por arquitectura
-- [x] API con validacion de input (Zod) en rutas implementadas.
+## Checklist de seguridad
+- [x] Variables de entorno validadas en runtime con Zod (`lib/env.ts`, `realtime-service/src/env.ts`).
+- [x] Fallo explicito en build/start si faltan variables criticas (DB, Redis, Clerk, URLs publicas).
+- [x] Rutas `/app/**` protegidas con Clerk middleware (`middleware.ts`).
+- [x] Rate limiting en API Next.js (tasks/dashboard) con Redis (`lib/rate-limit.ts`).
+- [x] Rate limiting en eventos Socket.IO (`workspace:join`, `task:moved`, `task:created`, `presence:cursor`).
+- [x] Validacion de payloads realtime con Zod.
 - [x] Security headers en `next.config.ts`.
-- [x] Realtime service separado (`Socket.IO`) definido.
-- [x] Redis Pub/Sub definido para escalado de websockets.
-- [x] Docker compose con servicios `app`, `realtime`, `redis`, `db`.
 
-## Evidencia tecnica
-- `npm run lint`: OK
-- `npm run build`: OK
-- `realtime-service npm run build`: OK
-- `audit`: PASS (33/33 checks)
+## Riesgos remanentes
+- La calidad de auth E2E depende de secretos Clerk de testing provistos en CI.
+- Lighthouse CLI local puede fallar en entornos Windows con restriccion de Chrome headless (evidencia en `artifacts/lighthouse`).
 
-## Riesgos remanentes (no bloqueantes para mock go-live)
-- Integracion real Clerk/Auth aun no cableada end-to-end.
-- Persistencia real de datos (Prisma + PostgreSQL) aun no activada en flujos UI/API.
-- Realtime client-side aun no conectado en frontend (servicio listo).
-
-## Estado GATE 8 (pre-validacion)
-- Hardening minimo: completo.
-- Cumplimiento de seguridad y privacidad: PASS.
-- Pendiente: aprobacion humana de GATE 8.
-
+## Estado
+- Hardening de seguridad requerido por cliente: implementado.

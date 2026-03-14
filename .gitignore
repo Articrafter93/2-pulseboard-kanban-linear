@@ -25,3 +25,13 @@ pnpm-debug.log*
 Thumbs.db
 
 .vercel
+
+# Antigravity security baseline
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.pfx
+id_rsa
+id_rsa*

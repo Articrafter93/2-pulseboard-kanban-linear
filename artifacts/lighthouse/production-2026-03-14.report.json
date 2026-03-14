@@ -1,0 +1,7 @@
+{
+  "status": "failed",
+  "mode": "cli",
+  "targetUrl": "https://pulseboard-kanban-linear.vercel.app",
+  "generatedAt": "2026-03-14T04:54:44.258Z",
+  "error": "Command failed: npx lighthouse https://pulseboard-kanban-linear.vercel.app --output html --output json --output-path C:\\Users\\g-cub\\Antigravity projects\\playground\\proyectos\\2- Kanban colaborativo estilo Linear\\artifacts\\lighthouse\\production-2026-03-14.report --quiet --chrome-flags=\"--headless --no-sandbox\"\nnull"
+}

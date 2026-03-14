@@ -1,57 +1,29 @@
 import Link from "next/link";
+import { SignUp } from "@clerk/nextjs";
+import { clientEnv } from "@/lib/client-env";
 
 export default function SignUpPage() {
+  if (clientEnv.NEXT_PUBLIC_AUTH_PROVIDER !== "clerk") {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8">
+        <section className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-soft">
+          <h1 className="mb-2 font-[var(--font-display)] text-xl">Registro mock activo</h1>
+          <p className="mb-4 text-sm text-muted">
+            Para habilitar alta real con Clerk, configura claves válidas y `NEXT_PUBLIC_AUTH_PROVIDER=clerk`.
+          </p>
+          <Link href="/app/w/default/board" className="inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
+            Ir al tablero demo
+          </Link>
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-md items-center px-4">
-      <section className="w-full rounded-2xl border border-line bg-panel p-6">
-        <h1 className="font-[var(--font-display)] text-2xl">Create account</h1>
-        <p className="mt-1 text-sm text-muted">
-          This screen will connect to Clerk Organizations/Auth in implementation phase.
-        </p>
-        <form className="mt-5 space-y-3">
-          <label className="block">
-            <span className="mb-1 block text-xs text-muted">Work email</span>
-            <input
-              type="email"
-              className="w-full rounded-lg border border-line bg-panelAlt px-3 py-2 outline-none ring-accent focus:ring-2"
-              placeholder="you@company.com"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs text-muted">Workspace name</span>
-            <input
-              type="text"
-              className="w-full rounded-lg border border-line bg-panelAlt px-3 py-2 outline-none ring-accent focus:ring-2"
-              placeholder="Acme Studio"
-            />
-          </label>
-          <label className="flex items-start gap-2 rounded-lg border border-line bg-panelAlt px-3 py-2 text-xs text-slate-300">
-            <input type="checkbox" required className="mt-0.5 h-4 w-4 accent-accent" />
-            <span>
-              Acepto el tratamiento de datos segun la{" "}
-              <Link href="/privacidad" className="text-accent hover:underline">
-                politica de privacidad
-              </Link>
-              .
-            </span>
-          </label>
-          <button type="submit" className="w-full rounded-lg bg-accent py-2 font-semibold text-[#2b1b00]">
-            Create workspace
-          </button>
-        </form>
-        <p className="mt-4 text-sm text-muted">
-          Already have an account?{" "}
-          <Link href="/signin" className="text-accent hover:underline">
-            Sign in
-          </Link>
-        </p>
-        <p className="mt-2 text-xs text-muted">
-          Detalles de privacidad y conservacion de datos en{" "}
-          <Link href="/privacidad" className="text-accent hover:underline">
-            /privacidad
-          </Link>
-          .
-        </p>
+    <main className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8">
+      <section className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-soft">
+        <h1 className="mb-4 font-[var(--font-display)] text-xl">Crea tu workspace Pulseboard</h1>
+        <SignUp forceRedirectUrl="/app/w/default/board" />
       </section>
     </main>
   );

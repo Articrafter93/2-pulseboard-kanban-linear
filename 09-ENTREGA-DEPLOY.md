@@ -1,31 +1,25 @@
 # 09-ENTREGA-DEPLOY
 
 - Proyecto: Pulseboard (provisional)
-- Fecha: 2026-03-08
-- Fase: Paso 9 - Entrega tecnica y despliegue
+- Fecha: 2026-03-14
+- Fase: consolidacion de release para aceptacion cliente
 
-## Validaciones pre-deploy
+## Builds y validaciones
 - `npm run lint`: OK
 - `npm run build`: OK
-- `audit`: PASS (33 PASS | 0 FAIL | 0 WARN)
+- `npm --prefix realtime-service run build`: OK
 
-## Sincronizacion GitHub
-- Repositorio remoto: `https://github.com/Articrafter93/pulseboard-kanban-linear.git`
-- Rama de produccion: `main`
-- Estado HEAD vs origin/main al momento del deploy: `SYNC_OK`
+## Checklist release
+- [x] Realtime-service con Dockerfile propio (`realtime-service/Dockerfile`).
+- [x] README de producto actualizado con arquitectura y setup reproducible.
+- [x] CI obligatorio agregado (`.github/workflows/ci.yml`).
+- [x] Artefactos Lighthouse versionados en `artifacts/lighthouse/` (incluye resultado de ejecucion local).
 
-## Despliegue Vercel (produccion)
-- Proyecto Vercel: `pulseboard-kanban-linear`
-- Alias principal canonico: `https://pulseboard-kanban-linear.vercel.app`
-- Dashboard del proyecto: `https://vercel.com/articrafter93s-projects/pulseboard-kanban-linear`
-- Estado final: `Ready`
+## URL de produccion
+- Alias principal: `https://pulseboard-kanban-linear.vercel.app`
 
-## Notas operativas
-- Primer intento de deploy fallo por typecheck de `realtime-service`; corregido excluyendo esa carpeta del `tsconfig` web y re-deploy exitoso.
-- Go-live actual etiquetado como `temporal` por operar en `mock-first`.
+## Repositorio GitHub oficial
+- `https://github.com/Articrafter93/2-pulseboard-kanban-linear`
 
-## Estado GATE 9 (pre-validacion)
-- Publicacion productiva: completada.
-- URL canonica en alias principal: completada.
-- Trazabilidad GitHub + SHA: completada.
-- Aprobacion humana de GATE 9: aprobada.
+## Nota
+- La ejecucion local de Lighthouse CLI en esta maquina devolvio error de permisos de Chrome headless; la evidencia del fallo quedo guardada en artefacto JSON para trazabilidad.

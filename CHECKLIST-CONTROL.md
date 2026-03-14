@@ -93,3 +93,13 @@
 - [2026-03-08] GATE 8 - Archivo: `08-SEGURIDAD-PREDEPLOY.md` - Evidencia: checklist de seguridad completado y riesgos remanentes documentados.
 - [2026-03-08] GATE 9 - Archivo: `09-ENTREGA-DEPLOY.md` - Evidencia: GitHub `origin/main` sincronizado + Vercel `Ready` + alias canonico.
 - [2026-03-08] GATE 10 - Archivo: `10-CIERRE-HANDOVER.md` - Evidencia: manual operativo, riesgos remanentes y backlog de continuidad.
+
+## Actualizacion 2026-03-14 (aceptacion cliente)
+- [x] Auth Clerk integrado en rutas privadas.
+- [x] Persistencia de tareas en Prisma/PostgreSQL.
+- [x] Servicio realtime con presencia/cursor/reconexion.
+- [x] Rate limiting API + socket con Redis.
+- [x] Suite E2E Playwright agregada.
+- [x] CI obligatorio (lint/build/e2e) agregado.
+- [x] README de producto reescrito con Mermaid y setup completo.
+- [x] Evidencia Lighthouse versionada (con estado de ejecucion local).

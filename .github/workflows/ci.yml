@@ -1,0 +1,96 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pulseboard
+          POSTGRES_PASSWORD: pulseboard
+          POSTGRES_DB: pulseboard
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pulseboard -d pulseboard"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      NEXT_PUBLIC_APP_NAME: Pulseboard
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_REALTIME_SERVICE_URL: http://127.0.0.1:4001
+      NEXT_PUBLIC_AUTH_PROVIDER: mock
+      REALTIME_SERVICE_URL: http://127.0.0.1:4001
+      DATABASE_URL: postgresql://pulseboard:pulseboard@localhost:5432/pulseboard?schema=public
+      DIRECT_URL: postgresql://pulseboard:pulseboard@localhost:5432/pulseboard?schema=public
+      REDIS_URL: redis://localhost:6379
+      REALTIME_PORT: 4001
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY || 'sk_test_ci_placeholder' }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_ci_placeholder' }}
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /signin
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: /signup
+      RATE_LIMIT_API_WINDOW_MS: 60000
+      RATE_LIMIT_API_MAX: 120
+      RATE_LIMIT_SOCKET_WINDOW_MS: 60000
+      RATE_LIMIT_SOCKET_MAX: 90
+      E2E_CLERK_EMAIL: ${{ secrets.E2E_CLERK_EMAIL }}
+      E2E_CLERK_PASSWORD: ${{ secrets.E2E_CLERK_PASSWORD }}
+      E2E_CLERK_EMAIL_2: ${{ secrets.E2E_CLERK_EMAIL_2 }}
+      E2E_CLERK_PASSWORD_2: ${{ secrets.E2E_CLERK_PASSWORD_2 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install realtime dependencies
+        run: npm --prefix realtime-service ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Push Prisma schema
+        run: npm run prisma:push
+
+      - name: Seed baseline data
+        run: npm run prisma:seed
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build web
+        run: npm run build
+
+      - name: Build realtime
+        run: npm run realtime:build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E
+        run: npm run test:e2e

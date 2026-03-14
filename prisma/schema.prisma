@@ -92,6 +92,7 @@ model Task {
   assigneeId     String?
   title          String
   description    String
+  labels         String[]     @default([])
   priority       Priority
   status         TaskStatus
   dueDate        DateTime?
@@ -129,4 +130,3 @@ model Activity {
 
   @@index([organizationId, createdAt])
 }
-

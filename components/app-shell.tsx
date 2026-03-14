@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 import { notifications } from "@/components/mock-data";
+import { env } from "@/lib/env";
 
 type AppShellProps = {
   workspaceId: string;
@@ -16,7 +18,14 @@ export function AppShell({ workspaceId, title, children }: AppShellProps) {
         <aside className="border-b border-line bg-panel/90 px-5 py-4 lg:border-b-0 lg:border-r">
           <div className="mb-6 flex items-center justify-between">
             <strong className="font-[var(--font-display)] text-lg tracking-tight">Pulseboard</strong>
-            <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">dark</span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">dark</span>
+              {env.NEXT_PUBLIC_AUTH_PROVIDER === "clerk" ? (
+                <UserButton />
+              ) : (
+                <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">mock auth</span>
+              )}
+            </div>
           </div>
           <nav className="space-y-2 text-sm">
             <NavItem href={`${base}/board`} label="Board" />
@@ -79,4 +88,3 @@ function NavItem({ href, label }: { href: string; label: string }) {
     </Link>
   );
 }
-

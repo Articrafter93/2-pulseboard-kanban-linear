@@ -1,9 +1,32 @@
-import { tasks, members } from "@/components/mock-data";
+import { prisma } from "@/lib/prisma";
+import { ensureWorkspaceSeed } from "@/lib/workspace-seed";
 
-export default function ReportsPage() {
-  const completed = tasks.filter((task) => task.status === "done").length;
-  const blocked = tasks.filter((task) => task.status === "backlog").length;
-  const overdue = tasks.filter((task) => task.dueDate < "2026-03-11").length;
+export default async function ReportsPage({
+  params,
+}: {
+  params: Promise<{ workspaceId: string }>;
+}) {
+  const { workspaceId } = await params;
+  const { organization } = await ensureWorkspaceSeed(workspaceId);
+
+  const [completed, blocked, overdue, members] = await Promise.all([
+    prisma.task.count({ where: { organizationId: organization.id, status: "DONE" } }),
+    prisma.task.count({ where: { organizationId: organization.id, status: "BACKLOG" } }),
+    prisma.task.count({ where: { organizationId: organization.id, dueDate: { lt: new Date() }, status: { not: "DONE" } } }),
+    prisma.member.findMany({
+      where: { organizationId: organization.id },
+      select: {
+        id: true,
+        displayName: true,
+        _count: {
+          select: {
+            assignedTasks: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
 
   return (
     <section className="space-y-3">
@@ -18,13 +41,13 @@ export default function ReportsPage() {
           {members.map((member) => (
             <div key={member.id} className="rounded-lg border border-line bg-panelAlt p-3">
               <div className="mb-1 flex items-center justify-between text-sm">
-                <span>{member.name}</span>
-                <span className="text-muted">{member.workload} active tasks</span>
+                <span>{member.displayName}</span>
+                <span className="text-muted">{member._count.assignedTasks} active tasks</span>
               </div>
               <div className="h-2 rounded bg-slate-800">
                 <div
                   className="h-2 rounded bg-accent"
-                  style={{ width: `${Math.min(100, member.workload * 9)}%` }}
+                  style={{ width: `${Math.min(100, member._count.assignedTasks * 8)}%` }}
                 />
               </div>
             </div>
@@ -43,4 +66,3 @@ function MetricCard({ label, value }: { label: string; value: string }) {
     </article>
   );
 }
-
