@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { ensureWorkspaceSeed } from "@/lib/workspace-seed";
 import { assertRateLimit } from "@/lib/rate-limit";
-import { getOptionalUserId } from "@/lib/auth-runtime";
+import { requireUserId } from "@/lib/auth-runtime";
+import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
 
 const DashboardQuerySchema = z.object({
   workspaceId: z.string().min(1).default("default"),
@@ -11,12 +11,12 @@ const DashboardQuerySchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const userId = await getOptionalUserId();
-  const forwarded = request.headers.get("x-forwarded-for") ?? "";
-  const ip = forwarded.split(",")[0]?.trim() || "127.0.0.1";
-  const key = userId ?? `ip:${ip}`;
+  const userId = await requireUserId();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  const rate = await assertRateLimit(`dashboard:get:${key}`);
+  const rate = await assertRateLimit(`dashboard:get:${userId}`);
   if (!rate.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
@@ -32,35 +32,42 @@ export async function GET(request: Request) {
   }
 
   const { workspaceId, includeWorkload } = parsed.data;
-  const { organization } = await ensureWorkspaceSeed(workspaceId);
+  try {
+    const { organization } = await getWorkspaceContext(workspaceId, userId);
 
-  const [completed, blocked, inProgress] = await Promise.all([
-    prisma.task.count({ where: { organizationId: organization.id, status: "DONE" } }),
-    prisma.task.count({ where: { organizationId: organization.id, status: "BACKLOG" } }),
-    prisma.task.count({ where: { organizationId: organization.id, status: "IN_PROGRESS" } }),
-  ]);
+    const [completed, blocked, inProgress] = await Promise.all([
+      prisma.task.count({ where: { organizationId: organization.id, status: "DONE" } }),
+      prisma.task.count({ where: { organizationId: organization.id, status: "BACKLOG" } }),
+      prisma.task.count({ where: { organizationId: organization.id, status: "IN_PROGRESS" } }),
+    ]);
 
-  const workload = includeWorkload === "true"
-    ? await prisma.member.findMany({
-        where: { organizationId: organization.id },
-        select: {
-          displayName: true,
-          _count: {
-            select: {
-              assignedTasks: true,
+    const workload = includeWorkload === "true"
+      ? await prisma.member.findMany({
+          where: { organizationId: organization.id },
+          select: {
+            displayName: true,
+            _count: {
+              select: {
+                assignedTasks: true,
+              },
             },
           },
-        },
-      })
-    : [];
+        })
+      : [];
 
-  return NextResponse.json({
-    completed,
-    blocked,
-    inProgress,
-    workload: workload.map((member) => ({
-      name: member.displayName,
-      activeTasks: member._count.assignedTasks,
-    })),
-  });
+    return NextResponse.json({
+      completed,
+      blocked,
+      inProgress,
+      workload: workload.map((member) => ({
+        name: member.displayName,
+        activeTasks: member._count.assignedTasks,
+      })),
+    });
+  } catch (error) {
+    if (error instanceof WorkspaceAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    throw error;
+  }
 }

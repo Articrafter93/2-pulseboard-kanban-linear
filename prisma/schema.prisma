@@ -54,6 +54,7 @@ model Member {
   assignedTasks  Task[]       @relation("TaskAssignee")
 
   @@index([organizationId, role])
+  @@unique([organizationId, userExternalId])
 }
 
 model Project {

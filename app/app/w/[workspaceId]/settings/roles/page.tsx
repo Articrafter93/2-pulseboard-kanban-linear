@@ -1,3 +1,5 @@
+import { Show } from "@clerk/nextjs";
+
 const roleNotes = [
   "Owner: full administrative control, billing, and destructive actions.",
   "Admin: manage projects, cycles, and member access policies.",
@@ -16,7 +18,11 @@ export default function RolesSettingsPage() {
           </li>
         ))}
       </ul>
+      <div className="mt-4 rounded-lg border border-line bg-panelAlt p-3 text-sm text-slate-300">
+        <Show when={{ role: "org:admin" }} fallback={<p>Admin-only actions are hidden for your current org role.</p>}>
+          <p>Admin actions enabled: member invitations, role edits, and workspace configuration.</p>
+        </Show>
+      </div>
     </section>
   );
 }
-

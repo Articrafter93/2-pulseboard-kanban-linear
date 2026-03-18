@@ -3,8 +3,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { assertRateLimit } from "@/lib/rate-limit";
 import { boardStatuses, boardStatusToDb } from "@/lib/task-status";
-import { ensureWorkspaceSeed, mapTaskToDto } from "@/lib/workspace-seed";
+import { mapTaskToDto } from "@/lib/workspace-seed";
 import { requireUserId } from "@/lib/auth-runtime";
+import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
 
 const MoveTaskSchema = z.object({
   workspaceId: z.string().min(1).default("default"),
@@ -37,39 +38,59 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ta
   const { taskId } = await params;
   const { workspaceId, status } = parsed.data;
 
-  const { organization } = await ensureWorkspaceSeed(workspaceId);
+  try {
+    const { organization, member } = await getWorkspaceContext(workspaceId, userId);
 
-  const updated = await prisma.task.updateMany({
-    where: {
-      id: taskId,
-      organizationId: organization.id,
-    },
-    data: {
-      status: boardStatusToDb(status),
-    },
-  });
+    const updated = await prisma.task.updateMany({
+      where: {
+        id: taskId,
+        organizationId: organization.id,
+      },
+      data: {
+        status: boardStatusToDb(status),
+      },
+    });
 
-  if (updated.count === 0) {
-    return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    if (updated.count === 0) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        labels: true,
+        dueDate: true,
+        assignee: { select: { displayName: true } },
+      },
+    });
+
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    await prisma.activity.create({
+      data: {
+        organizationId: organization.id,
+        taskId,
+        actor: member.displayName,
+        eventType: "task.moved",
+        payload: {
+          taskId,
+          status,
+        },
+      },
+    });
+
+    return NextResponse.json({ item: mapTaskToDto(task) });
+  } catch (error) {
+    if (error instanceof WorkspaceAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    throw error;
   }
-
-  const task = await prisma.task.findUnique({
-    where: { id: taskId },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      status: true,
-      priority: true,
-      labels: true,
-      dueDate: true,
-      assignee: { select: { displayName: true } },
-    },
-  });
-
-  if (!task) {
-    return NextResponse.json({ error: "Task not found" }, { status: 404 });
-  }
-
-  return NextResponse.json({ item: mapTaskToDto(task) });
 }

@@ -3,8 +3,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { assertRateLimit } from "@/lib/rate-limit";
 import { boardStatuses, boardStatusToDb } from "@/lib/task-status";
-import { ensureWorkspaceSeed, mapTaskToDto, priorityFromUi } from "@/lib/workspace-seed";
-import { getOptionalUserId, requireUserId } from "@/lib/auth-runtime";
+import { mapTaskToDto, priorityFromUi } from "@/lib/workspace-seed";
+import { requireUserId } from "@/lib/auth-runtime";
+import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
 
 const TasksQuerySchema = z.object({
   workspaceId: z.string().min(1).default("default"),
@@ -23,14 +24,18 @@ const CreateTaskSchema = z.object({
   dueDate: z.string().date().optional(),
 });
 
-function getRequesterIdentity(request: Request, userId: string | null) {
+function getRequesterIdentity(request: Request, userId: string) {
   const forwarded = request.headers.get("x-forwarded-for") ?? "";
   const ip = forwarded.split(",")[0]?.trim() || "127.0.0.1";
   return userId ?? `ip:${ip}`;
 }
 
 export async function GET(request: Request) {
-  const userId = await getOptionalUserId();
+  const userId = await requireUserId();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const rate = await assertRateLimit(`tasks:get:${getRequesterIdentity(request, userId)}`);
   if (!rate.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
@@ -49,43 +54,50 @@ export async function GET(request: Request) {
   }
 
   const { workspaceId, status, page, pageSize } = parsed.data;
-  const { organization } = await ensureWorkspaceSeed(workspaceId);
+  try {
+    const { organization } = await getWorkspaceContext(workspaceId, userId);
 
-  const where = {
-    organizationId: organization.id,
-    ...(status ? { status: boardStatusToDb(status) } : {}),
-  };
+    const where = {
+      organizationId: organization.id,
+      ...(status ? { status: boardStatusToDb(status) } : {}),
+    };
 
-  const [items, total] = await Promise.all([
-    prisma.task.findMany({
-      where,
-      include: { assignee: { select: { displayName: true } } },
-      orderBy: [{ updatedAt: "desc" }],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    }),
-    prisma.task.count({ where }),
-  ]);
+    const [items, total] = await Promise.all([
+      prisma.task.findMany({
+        where,
+        include: { assignee: { select: { displayName: true } } },
+        orderBy: [{ updatedAt: "desc" }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.task.count({ where }),
+    ]);
 
-  const totalPages = Math.ceil(total / pageSize);
+    const totalPages = Math.ceil(total / pageSize);
 
-  return NextResponse.json(
-    {
-      items: items.map(mapTaskToDto),
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages,
-        hasNextPage: page < totalPages,
+    return NextResponse.json(
+      {
+        items: items.map(mapTaskToDto),
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages,
+          hasNextPage: page < totalPages,
+        },
       },
-    },
-    {
-      headers: {
-        "Cache-Control": "no-store",
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
       },
-    },
-  );
+    );
+  } catch (error) {
+    if (error instanceof WorkspaceAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    throw error;
+  }
 }
 
 export async function POST(request: Request) {
@@ -107,28 +119,43 @@ export async function POST(request: Request) {
   }
 
   const { workspaceId, title, description, status, labels, priority, dueDate } = parsed.data;
-  const { organization, project } = await ensureWorkspaceSeed(workspaceId);
+  try {
+    const { organization, project, member } = await getWorkspaceContext(workspaceId, userId);
 
-  const assignee = await prisma.member.findFirst({
-    where: { organizationId: organization.id },
-    orderBy: { createdAt: "asc" },
-    select: { id: true },
-  });
+    const task = await prisma.task.create({
+      data: {
+        organizationId: organization.id,
+        projectId: project.id,
+        assigneeId: member.id,
+        title,
+        description,
+        status: boardStatusToDb(status),
+        labels,
+        priority: priorityFromUi(priority),
+        dueDate: dueDate ? new Date(dueDate) : null,
+      },
+      include: { assignee: { select: { displayName: true } } },
+    });
 
-  const task = await prisma.task.create({
-    data: {
-      organizationId: organization.id,
-      projectId: project.id,
-      assigneeId: assignee?.id,
-      title,
-      description,
-      status: boardStatusToDb(status),
-      labels,
-      priority: priorityFromUi(priority),
-      dueDate: dueDate ? new Date(dueDate) : null,
-    },
-    include: { assignee: { select: { displayName: true } } },
-  });
+    await prisma.activity.create({
+      data: {
+        organizationId: organization.id,
+        taskId: task.id,
+        actor: member.displayName,
+        eventType: "task.created",
+        payload: {
+          taskId: task.id,
+          status,
+          priority,
+        },
+      },
+    });
 
-  return NextResponse.json({ item: mapTaskToDto(task) }, { status: 201 });
+    return NextResponse.json({ item: mapTaskToDto(task) }, { status: 201 });
+  } catch (error) {
+    if (error instanceof WorkspaceAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    throw error;
+  }
 }
