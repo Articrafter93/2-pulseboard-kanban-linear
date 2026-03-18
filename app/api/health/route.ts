@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     status: "ok",
     service: "pulseboard-web",
-    mockMode: env.MOCK_DB_ENABLED,
+    authProvider: env.NEXT_PUBLIC_AUTH_PROVIDER,
     envValidated: true,
     workspaceId: parsed.data.workspaceId ?? null,
   });

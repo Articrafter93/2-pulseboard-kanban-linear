@@ -8,18 +8,31 @@ const publicRoutes = createRouteMatcher([
   "/",
   "/signin(.*)",
   "/signup(.*)",
+  "/select-org(.*)",
   "/privacidad",
   "/api/health(.*)",
 ]);
 
 const protectedMiddleware = clerkMiddleware(async (authObject, request) => {
+  const session = await authObject();
+
   if (!publicRoutes(request)) {
     await authObject.protect();
+  }
+
+  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith("/app") && !pathname.startsWith("/app/api") && !session.orgId) {
+    return NextResponse.redirect(new URL("/select-org", request.url));
   }
 });
 
 export default function middleware(request: NextRequest, event: NextFetchEvent) {
   if (!clerkEnabled) {
+    if (!publicRoutes(request)) {
+      const signInUrl = new URL("/signin", request.url);
+      signInUrl.searchParams.set("redirect_url", request.nextUrl.pathname);
+      return NextResponse.redirect(signInUrl);
+    }
     return NextResponse.next();
   }
 

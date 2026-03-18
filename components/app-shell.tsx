@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
-import { notifications } from "@/components/mock-data";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { env } from "@/lib/env";
 
 type AppShellProps = {
@@ -11,6 +10,11 @@ type AppShellProps = {
 
 export function AppShell({ workspaceId, title, children }: AppShellProps) {
   const base = `/app/w/${workspaceId}`;
+  const notifications = [
+    "Realtime sync and rate limiting are active.",
+    "Activity feed now persists workspace events.",
+    "Use Create Workspace flow to provision your first board.",
+  ];
 
   return (
     <div className="min-h-screen text-text">
@@ -21,9 +25,21 @@ export function AppShell({ workspaceId, title, children }: AppShellProps) {
             <div className="flex items-center gap-2">
               <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">dark</span>
               {env.NEXT_PUBLIC_AUTH_PROVIDER === "clerk" ? (
-                <UserButton />
+                <>
+                  <OrganizationSwitcher
+                    hidePersonal
+                    afterSelectOrganizationUrl="/app"
+                    afterCreateOrganizationUrl="/app"
+                    appearance={{
+                      elements: {
+                        organizationSwitcherTrigger: "rounded-full border border-line bg-panelAlt px-2 py-1 text-[10px] text-slate-200",
+                      },
+                    }}
+                  />
+                  <UserButton />
+                </>
               ) : (
-                <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">mock auth</span>
+                <span className="rounded-full border border-line px-2 py-1 text-[10px] text-amber-300">auth pending</span>
               )}
             </div>
           </div>

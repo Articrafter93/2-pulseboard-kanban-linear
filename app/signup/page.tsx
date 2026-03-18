@@ -7,12 +7,12 @@ export default function SignUpPage() {
     return (
       <main className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8">
         <section className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-soft">
-          <h1 className="mb-2 font-[var(--font-display)] text-xl">Registro mock activo</h1>
+          <h1 className="mb-2 font-[var(--font-display)] text-xl">Registro no disponible</h1>
           <p className="mb-4 text-sm text-muted">
-            Para habilitar alta real con Clerk, configura claves válidas y `NEXT_PUBLIC_AUTH_PROVIDER=clerk`.
+            Este entorno ya no crea usuarios demo. Configura `NEXT_PUBLIC_AUTH_PROVIDER=clerk` y claves válidas de Clerk para habilitar alta real.
           </p>
-          <Link href="/app/w/default/board" className="inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
-            Ir al tablero demo
+          <Link href="/" className="inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
+            Volver al inicio
           </Link>
         </section>
       </main>
@@ -23,7 +23,7 @@ export default function SignUpPage() {
     <main className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8">
       <section className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-soft">
         <h1 className="mb-4 font-[var(--font-display)] text-xl">Crea tu workspace Pulseboard</h1>
-        <SignUp forceRedirectUrl="/app/w/default/board" />
+        <SignUp forceRedirectUrl="/app" />
       </section>
     </main>
   );

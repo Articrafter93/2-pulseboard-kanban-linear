@@ -33,10 +33,10 @@ export default function HomePage() {
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href="/app/w/default/board"
+            href="/signup"
             className="rounded-xl bg-accent px-5 py-3 font-semibold text-white transition hover:brightness-110"
           >
-            Open Demo Workspace
+            Create Workspace
           </Link>
           <Link href="/signin" className="rounded-xl border border-line px-5 py-3 font-semibold hover:bg-panel">
             Sign in
