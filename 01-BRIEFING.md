@@ -1,7 +1,7 @@
 # 01-BRIEFING
 
 - Proyecto: Pulseboard (nombre provisional)
-- Ruta destino: C:\Users\g-cub\Antigravity projects\playground\2- Kanban colaborativo estilo Linear
+- Ruta destino: C:\Users\g-cub\Antigravity projects\proyectos\2- Kanban colaborativo estilo Linear
 - Cliente: Nuevo cliente (correo recibido, nombre legal pendiente)
 - Responsable tecnico: Codex + developer
 - Fecha inicio: 2026-03-08
@@ -103,3 +103,4 @@ Construir el producto central de startup "Pulseboard": una plataforma de gestion
 - Stack tecnico oficial: Next.js + PostgreSQL + Prisma + Socket.IO + Redis + Clerk/Auth.js.
 - Docker local es obligatorio por solicitud del cliente.
 - Deploy limpio y demo usable con datos convincentes son requisitos de entrega.
+

@@ -6,7 +6,7 @@
 
 ## Evidencia visual generada
 - Carpeta central:
-  - `C:\Users\g-cub\Antigravity projects\playground\propuestas de stitch\Pulseboard\project-local-fallback-20260308`
+  - `C:\Users\g-cub\Antigravity projects\proyectos\propuestas de stitch\Pulseboard\project-local-fallback-20260308`
 
 ## Incidente Stitch
 - Intento de uso de StitchMCP:
@@ -44,4 +44,5 @@
 - [x] Expansion multipagina generada en carpeta de la propuesta elegida.
 - [x] Artefactos visuales guardados en `.html`.
 - [ ] Aprobacion humana de GATE 4.
+
 
