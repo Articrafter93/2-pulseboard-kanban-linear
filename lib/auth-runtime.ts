@@ -6,7 +6,7 @@ export const isClerkAuthEnabled = env.NEXT_PUBLIC_AUTH_PROVIDER === "clerk";
 
 export async function getOptionalUserId(): Promise<string | null> {
   if (!isClerkAuthEnabled) {
-    return null;
+    return "mock-user";
   }
 
   const { userId } = await auth();
@@ -21,8 +21,8 @@ export async function requireUserId(): Promise<string | null> {
 export async function getRealtimeUser(): Promise<RealtimeUser> {
   if (!isClerkAuthEnabled) {
     return {
-      id: "anonymous",
-      name: "Guest",
+      id: "mock-user",
+      name: "Demo User",
     };
   }
 

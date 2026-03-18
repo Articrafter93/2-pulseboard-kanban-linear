@@ -1,8 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { SelectOrganizationPanel } from "@/components/select-organization-panel";
+import { isClerkAuthEnabled } from "@/lib/auth-runtime";
 
 export default async function SelectOrgPage() {
+  if (!isClerkAuthEnabled) {
+    redirect("/app/w/default/board");
+  }
+
   const { userId, orgSlug } = await auth();
 
   if (!userId) {

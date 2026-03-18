@@ -19,3 +19,7 @@
 
 ## Estado
 - Hardening de seguridad requerido por cliente: implementado.
+
+## Actualizacion 2026-03-18
+- Escaneo de secretos sobre archivos versionados: `SECRETS_REPORT.md`
+- Resultado del escaneo: PASS (0 hallazgos)

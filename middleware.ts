@@ -28,11 +28,6 @@ const protectedMiddleware = clerkMiddleware(async (authObject, request) => {
 
 export default function middleware(request: NextRequest, event: NextFetchEvent) {
   if (!clerkEnabled) {
-    if (!publicRoutes(request)) {
-      const signInUrl = new URL("/signin", request.url);
-      signInUrl.searchParams.set("redirect_url", request.nextUrl.pathname);
-      return NextResponse.redirect(signInUrl);
-    }
     return NextResponse.next();
   }
 

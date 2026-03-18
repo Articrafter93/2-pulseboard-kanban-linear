@@ -29,6 +29,24 @@
 - Ejecucion completa de E2E requiere secretos Clerk de prueba (`E2E_CLERK_*`) y daemon Docker activo para PostgreSQL/Redis.
 - CI (`.github/workflows/ci.yml`) deja la ejecucion obligatoria de lint/build/e2e con servicios levantados.
 
+## Actualizacion 2026-03-18 (revision final)
+- `docker compose up -d --force-recreate db redis`: OK
+- `npm run prisma:push`: OK
+- `npm run prisma:seed`: OK
+- `npm run lint`: OK
+- `npm run build`: OK
+- `npm --prefix realtime-service run build`: OK
+- `npx playwright test tests/e2e/revision-final-audit.spec.ts`: PASS
+- Pasada visual manual con Playwright MCP:
+  - `/`: hero, CTA principal y footer visibles
+  - `/privacidad`: contenido legal y `h1` verificados
+  - `/signin`: acceso demo visible con credenciales mock
+  - `/app/w/default/board`: tablero, presencia y shell operativos
+  - `/app/w/default/reports` y `/app/w/default/activity`: navegacion principal resuelta
+- Validacion de endpoints en UI real:
+  - `/api/health`: 200
+  - `/api/tasks` por status `backlog|to_do|in_progress|done`: 200
+
 ## Lighthouse en produccion
 - Script: `npm run lighthouse:prod`
 - Artefactos:

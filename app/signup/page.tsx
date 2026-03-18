@@ -7,13 +7,18 @@ export default function SignUpPage() {
     return (
       <main className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-8">
         <section className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-soft">
-          <h1 className="mb-2 font-[var(--font-display)] text-xl">Registro no disponible</h1>
+          <h1 className="mb-2 font-[var(--font-display)] text-xl">Demo mode active</h1>
           <p className="mb-4 text-sm text-muted">
-            Este entorno ya no crea usuarios demo. Configura `NEXT_PUBLIC_AUTH_PROVIDER=clerk` y claves válidas de Clerk para habilitar alta real.
+            Sign-up is disabled in mock mode because the review flow uses a seeded workspace instead of live Clerk onboarding.
           </p>
-          <Link href="/" className="inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
-            Volver al inicio
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/app/w/default/board" className="inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white">
+              Open demo workspace
+            </Link>
+            <Link href="/" className="inline-flex rounded-lg border border-line px-4 py-2 text-sm font-semibold text-white">
+              Back to home
+            </Link>
+          </div>
         </section>
       </main>
     );

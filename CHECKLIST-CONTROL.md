@@ -1,7 +1,7 @@
 # CHECKLIST-CONTROL
 
 - Proyecto: Pulseboard (provisional)
-- Ultima actualizacion: 2026-03-08
+- Ultima actualizacion: 2026-03-18
 - Documento cliente base: `INSTRUCCIONES-CLIENTE-KANBAN-LINEAR.md`
 
 ## Hecho
@@ -42,6 +42,7 @@
 - [x] Paso 10 documentado con handover y backlog.
 - [x] GATE 9 aprobado por developer.
 - [x] GATE 10 aprobado por developer.
+- [x] Revisión final ejecutada con pasada funcional local y evidencias actualizadas.
 
 ## Pendiente
 - [x] Sin pendientes criticos de workflow `init`.
@@ -77,6 +78,7 @@
 - [2026-03-08] Paso 8 - Estado: completo - Nota: hardening pre-deploy documentado.
 - [2026-03-08] Paso 9 - Estado: completo - Nota: repo GitHub sincronizado y deploy productivo listo en Vercel.
 - [2026-03-08] Paso 10 - Estado: completo - Nota: cierre y handover documentados en `10-CIERRE-HANDOVER.md`.
+- [2026-03-18] Revision final - Estado: completo - Nota: build, seed, E2E mock y pasada manual Playwright completados; secreto scan fallback PASS.
 
 ## Evidencias por GATE
 - [2026-03-08] GATE 1 - Archivo: `01-BRIEFING.md` - Evidencia: correo exacto del cliente consolidado (Pulseboard + alcance completo).
