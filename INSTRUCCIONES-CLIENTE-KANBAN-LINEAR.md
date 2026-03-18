@@ -43,7 +43,7 @@
 ## Matriz de cumplimiento
 | ID | Exigencia | Estado | Evidencia |
 |---|---|---|---|
-| C-01 | Crear proyecto desde cero en carpeta destino aprobada | Cumple | `C:\Users\g-cub\Antigravity projects\playground\2- Kanban colaborativo estilo Linear` |
+| C-01 | Crear proyecto desde cero en carpeta destino aprobada | Cumple | `C:\Users\g-cub\Antigravity projects\proyectos\2- Kanban colaborativo estilo Linear` |
 | C-02 | Briefing inicial completo | Cumple | `01-BRIEFING.md` |
 | C-03 | Matriz backend por rubro con decision inicial API | Cumple | `MATRIZ-BACKEND.md` |
 | C-04 | Modo de datos mock-first documentado | Cumple (temporal) | `01-BRIEFING.md`, `MATRIZ-BACKEND.md` |
@@ -97,3 +97,4 @@
 2. Entregar secretos en `.env.local` (sin exponer en git).
 3. Ejecutar migracion de modelo de datos y adaptadores.
 4. Re-ejecutar QA y seguridad antes de go-live definitivo.
+
