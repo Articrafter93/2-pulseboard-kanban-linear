@@ -89,8 +89,8 @@
 | C-44 | Aprobacion GATE 10 | Cumple | `CHECKLIST-CONTROL.md`, `10-CIERRE-HANDOVER.md` |
 
 ## Condiciones de cierre
-- [ ] GATE 9 cerrado
-- [ ] GATE 10 cerrado
+- [x] GATE 9 cerrado
+- [x] GATE 10 cerrado
 
 ## Plan de migracion mock a real (borrador)
 1. Confirmar proveedor real de DB, auth y realtime.

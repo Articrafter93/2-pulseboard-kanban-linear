@@ -2,6 +2,7 @@ import { Role, type Prisma } from "@prisma/client";
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { isClerkAuthEnabled } from "@/lib/auth-runtime";
+import { ensureWorkspaceSeed } from "@/lib/workspace-seed";
 
 type WorkspaceContext = {
   organization: {
@@ -171,6 +172,10 @@ async function syncWorkspaceToDatabase(
 }
 
 export async function getDefaultWorkspaceSlug(userId: string) {
+  if (!isClerkAuthEnabled) {
+    return "default";
+  }
+
   const active = await getActiveClerkContext();
   if (active.userId !== userId) {
     throw new WorkspaceAccessError("User mismatch", 403);
@@ -179,6 +184,33 @@ export async function getDefaultWorkspaceSlug(userId: string) {
 }
 
 export async function getWorkspaceContext(workspaceSlug: string, userId: string): Promise<WorkspaceContext> {
+  if (!isClerkAuthEnabled) {
+    if (userId !== "mock-user") {
+      throw new WorkspaceAccessError("Unauthorized", 401);
+    }
+
+    const { organization, project } = await ensureWorkspaceSeed(workspaceSlug);
+    const member = await prisma.member.findFirst({
+      where: { organizationId: organization.id, userExternalId: "seed-owner" },
+      select: { id: true, displayName: true, role: true },
+    });
+
+    if (!member) {
+      throw new WorkspaceAccessError("Workspace seed is incomplete", 409);
+    }
+
+    return {
+      organization: {
+        id: organization.id,
+        slug: organization.slug,
+        name: organization.name,
+        externalId: null,
+      },
+      member,
+      project,
+    };
+  }
+
   const active = await getActiveClerkContext();
 
   if (active.userId !== userId) {
