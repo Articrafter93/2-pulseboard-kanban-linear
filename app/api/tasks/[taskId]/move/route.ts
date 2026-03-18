@@ -55,7 +55,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ta
 
   const task = await prisma.task.findUnique({
     where: { id: taskId },
-    include: { assignee: { select: { displayName: true } } },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      status: true,
+      priority: true,
+      labels: true,
+      dueDate: true,
+      assignee: { select: { displayName: true } },
+    },
   });
 
   if (!task) {
