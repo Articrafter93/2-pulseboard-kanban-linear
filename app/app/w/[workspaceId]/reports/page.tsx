@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth-runtime";
+import { getDemoReports, isDemoWorkspaceId } from "@/lib/demo-workspace";
 import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
 
 export default async function ReportsPage({
@@ -15,9 +16,11 @@ export default async function ReportsPage({
   }
 
   let organizationId = "";
+  let isDemoWorkspace = false;
   try {
     const { organization } = await getWorkspaceContext(workspaceId, userId);
     organizationId = organization.id;
+    isDemoWorkspace = isDemoWorkspaceId(organization.id);
   } catch (error) {
     if (error instanceof WorkspaceAccessError) {
       notFound();
@@ -25,24 +28,38 @@ export default async function ReportsPage({
     throw error;
   }
 
-  const [completed, blocked, overdue, members] = await Promise.all([
-    prisma.task.count({ where: { organizationId, status: "DONE" } }),
-    prisma.task.count({ where: { organizationId, status: "BACKLOG" } }),
-    prisma.task.count({ where: { organizationId, dueDate: { lt: new Date() }, status: { not: "DONE" } } }),
-    prisma.member.findMany({
-      where: { organizationId },
-      select: {
-        id: true,
-        displayName: true,
-        _count: {
-          select: {
-            assignedTasks: true,
+  const fallback = isDemoWorkspace ? getDemoReports(workspaceId) : null;
+  const [completed, blocked, overdue, members] = fallback
+    ? [
+        fallback.completed,
+        fallback.blocked,
+        fallback.overdue,
+        fallback.workload.map((member) => ({
+          id: member.id,
+          displayName: member.displayName,
+          _count: {
+            assignedTasks: member.assignedTasks,
           },
-        },
-      },
-      orderBy: { createdAt: "asc" },
-    }),
-  ]);
+        })),
+      ]
+    : await Promise.all([
+        prisma.task.count({ where: { organizationId, status: "DONE" } }),
+        prisma.task.count({ where: { organizationId, status: "BACKLOG" } }),
+        prisma.task.count({ where: { organizationId, dueDate: { lt: new Date() }, status: { not: "DONE" } } }),
+        prisma.member.findMany({
+          where: { organizationId },
+          select: {
+            id: true,
+            displayName: true,
+            _count: {
+              select: {
+                assignedTasks: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "asc" },
+        }),
+      ]);
 
   return (
     <section className="space-y-3">

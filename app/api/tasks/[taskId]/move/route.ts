@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { isDemoWorkspaceId, moveDemoTask } from "@/lib/demo-workspace";
 import { assertRateLimit } from "@/lib/rate-limit";
 import { boardStatuses, boardStatusToDb } from "@/lib/task-status";
 import { mapTaskToDto } from "@/lib/workspace-seed";
@@ -40,6 +41,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ta
 
   try {
     const { organization, member } = await getWorkspaceContext(workspaceId, userId);
+    if (isDemoWorkspaceId(organization.id)) {
+      const item = moveDemoTask(workspaceId, taskId, status);
+      if (!item) {
+        return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ item });
+    }
 
     const updated = await prisma.task.updateMany({
       where: {
