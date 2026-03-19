@@ -2,9 +2,10 @@ import { Role, type Prisma } from "@prisma/client";
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { isClerkAuthEnabled } from "@/lib/auth-runtime";
+import { getDemoWorkspaceContext } from "@/lib/demo-workspace";
 import { ensureWorkspaceSeed } from "@/lib/workspace-seed";
 
-type WorkspaceContext = {
+export type WorkspaceContext = {
   organization: {
     id: string;
     slug: string;
@@ -189,26 +190,38 @@ export async function getWorkspaceContext(workspaceSlug: string, userId: string)
       throw new WorkspaceAccessError("Unauthorized", 401);
     }
 
-    const { organization, project } = await ensureWorkspaceSeed(workspaceSlug);
-    const member = await prisma.member.findFirst({
-      where: { organizationId: organization.id, userExternalId: "seed-owner" },
-      select: { id: true, displayName: true, role: true },
-    });
+    try {
+      const { organization, project } = await ensureWorkspaceSeed(workspaceSlug);
+      const member = await prisma.member.findFirst({
+        where: { organizationId: organization.id, userExternalId: "seed-owner" },
+        select: { id: true, displayName: true, role: true },
+      });
 
-    if (!member) {
-      throw new WorkspaceAccessError("Workspace seed is incomplete", 409);
+      if (!member) {
+        throw new WorkspaceAccessError("Workspace seed is incomplete", 409);
+      }
+
+      return {
+        organization: {
+          id: organization.id,
+          slug: organization.slug,
+          name: organization.name,
+          externalId: null,
+        },
+        member,
+        project,
+      };
+    } catch (error) {
+      if (error instanceof WorkspaceAccessError) {
+        throw error;
+      }
+
+      console.warn("[workspace-access] Falling back to demo workspace context", {
+        workspaceSlug,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+      return getDemoWorkspaceContext(workspaceSlug);
     }
-
-    return {
-      organization: {
-        id: organization.id,
-        slug: organization.slug,
-        name: organization.name,
-        externalId: null,
-      },
-      member,
-      project,
-    };
   }
 
   const active = await getActiveClerkContext();

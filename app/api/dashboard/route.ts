@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { getDemoReports, isDemoWorkspaceId } from "@/lib/demo-workspace";
 import { assertRateLimit } from "@/lib/rate-limit";
 import { requireUserId } from "@/lib/auth-runtime";
 import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
@@ -34,6 +35,21 @@ export async function GET(request: Request) {
   const { workspaceId, includeWorkload } = parsed.data;
   try {
     const { organization } = await getWorkspaceContext(workspaceId, userId);
+    if (isDemoWorkspaceId(organization.id)) {
+      const reports = getDemoReports(workspaceId);
+      return NextResponse.json({
+        completed: reports.completed,
+        blocked: reports.blocked,
+        inProgress: reports.workload
+          .reduce((sum, member) => sum + member.assignedTasks, 0) - reports.completed - reports.blocked,
+        workload: includeWorkload === "true"
+          ? reports.workload.map((member) => ({
+              name: member.displayName,
+              activeTasks: member.assignedTasks,
+            }))
+          : [],
+      });
+    }
 
     const [completed, blocked, inProgress] = await Promise.all([
       prisma.task.count({ where: { organizationId: organization.id, status: "DONE" } }),

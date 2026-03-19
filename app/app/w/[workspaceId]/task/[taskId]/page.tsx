@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { PriorityBadge } from "@/components/priority-badge";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth-runtime";
+import { getDemoTask, isDemoWorkspaceId } from "@/lib/demo-workspace";
 import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
 import { mapTaskToDto } from "@/lib/workspace-seed";
 
@@ -17,9 +18,11 @@ export default async function TaskDetailPage({
   }
 
   let organizationId = "";
+  let isDemoWorkspace = false;
   try {
     const { organization } = await getWorkspaceContext(workspaceId, userId);
     organizationId = organization.id;
+    isDemoWorkspace = isDemoWorkspaceId(organization.id);
   } catch (error) {
     if (error instanceof WorkspaceAccessError) {
       notFound();
@@ -27,16 +30,22 @@ export default async function TaskDetailPage({
     throw error;
   }
 
-  const task = await prisma.task.findFirst({
-    where: { id: taskId, organizationId },
-    include: { assignee: { select: { displayName: true } } },
-  });
+  const item = isDemoWorkspace
+    ? getDemoTask(workspaceId, taskId)
+    : mapTaskToDto(await prisma.task.findFirst({
+        where: { id: taskId, organizationId },
+        include: { assignee: { select: { displayName: true } } },
+      }).then((task) => {
+        if (!task) {
+          notFound();
+        }
 
-  if (!task) {
+        return task;
+      }));
+
+  if (!item) {
     notFound();
   }
-
-  const item = mapTaskToDto(task);
 
   return (
     <section className="space-y-3">

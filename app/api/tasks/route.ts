@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { createDemoTask, isDemoWorkspaceId, listDemoTasks } from "@/lib/demo-workspace";
 import { assertRateLimit } from "@/lib/rate-limit";
 import { boardStatuses, boardStatusToDb } from "@/lib/task-status";
 import { mapTaskToDto, priorityFromUi } from "@/lib/workspace-seed";
@@ -56,6 +57,13 @@ export async function GET(request: Request) {
   const { workspaceId, status, page, pageSize } = parsed.data;
   try {
     const { organization } = await getWorkspaceContext(workspaceId, userId);
+    if (isDemoWorkspaceId(organization.id)) {
+      return NextResponse.json(listDemoTasks(workspaceId, status, page, pageSize), {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      });
+    }
 
     const where = {
       organizationId: organization.id,
@@ -121,6 +129,17 @@ export async function POST(request: Request) {
   const { workspaceId, title, description, status, labels, priority, dueDate } = parsed.data;
   try {
     const { organization, project, member } = await getWorkspaceContext(workspaceId, userId);
+    if (isDemoWorkspaceId(organization.id)) {
+      const item = createDemoTask(workspaceId, {
+        title,
+        description,
+        status,
+        priority,
+        labels,
+      });
+
+      return NextResponse.json({ item }, { status: 201 });
+    }
 
     const task = await prisma.task.create({
       data: {

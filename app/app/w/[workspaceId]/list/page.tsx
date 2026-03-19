@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { PriorityBadge } from "@/components/priority-badge";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth-runtime";
+import { isDemoWorkspaceId, listDemoTasks } from "@/lib/demo-workspace";
 import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
 import { mapTaskToDto } from "@/lib/workspace-seed";
 
@@ -17,9 +18,11 @@ export default async function ListPage({
   }
 
   let organizationId = "";
+  let isDemoWorkspace = false;
   try {
     const { organization } = await getWorkspaceContext(workspaceId, userId);
     organizationId = organization.id;
+    isDemoWorkspace = isDemoWorkspaceId(organization.id);
   } catch (error) {
     if (error instanceof WorkspaceAccessError) {
       notFound();
@@ -27,21 +30,23 @@ export default async function ListPage({
     throw error;
   }
 
-  const tasks = await prisma.task.findMany({
-    where: { organizationId },
-    include: { assignee: { select: { displayName: true } } },
-    orderBy: [{ updatedAt: "desc" }],
-    take: 150,
-  });
-
-  const items = tasks.map(mapTaskToDto);
+  const items = isDemoWorkspace
+    ? listDemoTasks(workspaceId, undefined, 1, 150).items
+    : (await prisma.task.findMany({
+        where: { organizationId },
+        include: { assignee: { select: { displayName: true } } },
+        orderBy: [{ updatedAt: "desc" }],
+        take: 150,
+      })).map(mapTaskToDto);
 
   return (
     <section className="rounded-xl border border-line bg-panel p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-[var(--font-display)] text-xl">Task List</h2>
         <div className="flex gap-2 text-xs">
-          <span className="rounded-full border border-line px-2 py-1 text-muted">Persistencia: Prisma</span>
+          <span className="rounded-full border border-line px-2 py-1 text-muted">
+            Persistencia: {isDemoWorkspace ? "Demo fallback" : "Prisma"}
+          </span>
           <span className="rounded-full border border-line px-2 py-1 text-muted">Top 150</span>
         </div>
       </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth-runtime";
+import { getDemoMembers, isDemoWorkspaceId } from "@/lib/demo-workspace";
 import { WorkspaceAccessError, getWorkspaceContext } from "@/lib/workspace-access";
 
 export default async function MembersSettingsPage({
@@ -16,9 +17,11 @@ export default async function MembersSettingsPage({
   }
 
   let organizationId = "";
+  let isDemoWorkspace = false;
   try {
     const { organization } = await getWorkspaceContext(workspaceId, userId);
     organizationId = organization.id;
+    isDemoWorkspace = isDemoWorkspaceId(organization.id);
   } catch (error) {
     if (error instanceof WorkspaceAccessError) {
       notFound();
@@ -26,15 +29,21 @@ export default async function MembersSettingsPage({
     throw error;
   }
 
-  const members = await prisma.member.findMany({
-    where: { organizationId },
-    select: {
-      id: true,
-      displayName: true,
-      role: true,
-    },
-    orderBy: [{ role: "asc" }, { createdAt: "asc" }],
-  });
+  const members = isDemoWorkspace
+    ? getDemoMembers(workspaceId).map((member) => ({
+        id: member.id,
+        displayName: member.displayName,
+        role: member.role,
+      }))
+    : await prisma.member.findMany({
+        where: { organizationId },
+        select: {
+          id: true,
+          displayName: true,
+          role: true,
+        },
+        orderBy: [{ role: "asc" }, { createdAt: "asc" }],
+      });
 
   return (
     <section className="rounded-xl border border-line bg-panel p-4">
