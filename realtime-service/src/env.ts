@@ -7,6 +7,7 @@ dotenv.config({ path: process.env.REALTIME_ENV_PATH ?? path.resolve(process.cwd(
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   REALTIME_PORT: z.coerce.number().int().positive().default(4001),
+  PORT: z.coerce.number().int().positive().optional(),
   REDIS_URL: z.string().url(),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   RATE_LIMIT_SOCKET_WINDOW_MS: z.coerce.number().int().positive().default(60000),

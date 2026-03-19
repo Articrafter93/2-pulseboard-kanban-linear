@@ -191,7 +191,9 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(env.REALTIME_PORT, () => {
-  console.log(`[realtime] listening on ${env.REALTIME_PORT}`);
+const listenPort = env.PORT ?? env.REALTIME_PORT;
+
+httpServer.listen(listenPort, () => {
+  console.log(`[realtime] listening on ${listenPort}`);
   console.log(`[realtime] redis adapter at ${env.REDIS_URL}`);
 });
