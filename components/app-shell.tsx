@@ -21,7 +21,7 @@ export function AppShell({ workspaceId, title, children }: AppShellProps) {
       <div className="mx-auto grid min-h-screen max-w-[1440px] grid-cols-1 lg:grid-cols-[250px_1fr]">
         <aside className="border-b border-line bg-panel/90 px-5 py-4 lg:border-b-0 lg:border-r">
           <div className="mb-6 flex items-center justify-between">
-            <strong className="font-[var(--font-display)] text-lg tracking-tight">Pulseboard</strong>
+            <Link href="/" className="font-[var(--font-display)] text-lg tracking-tight font-bold hover:text-accent transition-colors">Pulseboard</Link>
             <div className="flex items-center gap-2">
               <span className="rounded-full border border-line px-2 py-1 text-[10px] text-muted">dark</span>
               {env.NEXT_PUBLIC_AUTH_PROVIDER === "clerk" ? (

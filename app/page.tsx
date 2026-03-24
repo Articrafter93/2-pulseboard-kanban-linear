@@ -16,7 +16,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="mx-auto max-w-6xl px-5 pb-10 pt-8">
+    <main className="mx-auto max-w-6xl px-5 py-4">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
       <div className="glass rounded-3xl p-6 md:p-10">
         <div className="mb-8 flex items-center justify-between">
@@ -49,7 +49,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <footer className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-panel/90 px-4 py-3">
+      <footer className="mt-3 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-panel/90 px-4 py-3">
         <p className="text-xs text-muted">Official social links pending client confirmation.</p>
         <div className="flex items-center gap-2">
           <SocialLink href="https://www.linkedin.com" label="LinkedIn" icon={<LinkedInIcon />} />
