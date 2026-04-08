@@ -54,7 +54,7 @@ function createInitialPagination(): PaginationState {
 export function BoardView({ workspaceId, currentUser }: { workspaceId: string; currentUser: RealtimeUser }) {
   const [itemsByStatus, setItemsByStatus] = useState<TaskState>(createEmptyTaskState);
   const [pagination, setPagination] = useState<PaginationState>(createInitialPagination);
-  const [connectionState, setConnectionState] = useState<"connecting" | "connected" | "reconnecting" | "offline">("connecting");
+  const [connectionState, setConnectionState] = useState<"connecting" | "connected" | "reconnecting" | "offline" | "demo">("connecting");
   const [pendingTask, setPendingTask] = useState<string | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskStatus, setNewTaskStatus] = useState<BoardStatus>("backlog");
@@ -121,6 +121,11 @@ export function BoardView({ workspaceId, currentUser }: { workspaceId: string; c
   }, [loadStatusPage]);
 
   useEffect(() => {
+    if (clientEnv.NEXT_PUBLIC_AUTH_PROVIDER === "mock") {
+      setConnectionState("demo");
+      return;
+    }
+
     const socket = io(clientEnv.NEXT_PUBLIC_REALTIME_SERVICE_URL, {
       transports: ["websocket"],
       reconnection: true,
@@ -472,7 +477,7 @@ export function BoardView({ workspaceId, currentUser }: { workspaceId: string; c
   );
 }
 
-function connectionLabel(state: "connecting" | "connected" | "reconnecting" | "offline") {
+function connectionLabel(state: "connecting" | "connected" | "reconnecting" | "offline" | "demo") {
   switch (state) {
     case "connected":
       return "Conectado";
@@ -480,6 +485,8 @@ function connectionLabel(state: "connecting" | "connected" | "reconnecting" | "o
       return "Reconectando...";
     case "offline":
       return "Sin conexión";
+    case "demo":
+      return "Demo (sin realtime)";
     case "connecting":
       return "Conectando...";
     default:

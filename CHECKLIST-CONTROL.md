@@ -43,6 +43,7 @@
 - [x] GATE 9 aprobado por developer.
 - [x] GATE 10 aprobado por developer.
 - [x] Revisión final ejecutada con pasada funcional local y evidencias actualizadas.
+- [x] Revisión final 2026-03-24: Playwright completo contra prod, 3 fixes aplicados (icon, home link, viewport).
 
 ## Pendiente
 - [x] Sin pendientes criticos de workflow `init`.
@@ -79,6 +80,7 @@
 - [2026-03-08] Paso 9 - Estado: completo - Nota: repo GitHub sincronizado y deploy productivo listo en Vercel.
 - [2026-03-08] Paso 10 - Estado: completo - Nota: cierre y handover documentados en `10-CIERRE-HANDOVER.md`.
 - [2026-03-18] Revision final - Estado: completo - Nota: build, seed, E2E mock y pasada manual Playwright completados; secreto scan fallback PASS.
+- [2026-03-24] Revision final v2 - Estado: completo - Nota: Playwright contra prod (todas las rutas OK), 3 fixes: favicon 404 resuelto (icon.svg), sidebar logo enlazado a home, landing padding ajustado a 100vh. Build PASS. PR pendiente merge.
 
 ## Evidencias por GATE
 - [2026-03-08] GATE 1 - Archivo: `01-BRIEFING.md` - Evidencia: correo exacto del cliente consolidado (Pulseboard + alcance completo).
